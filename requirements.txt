@@ -1,0 +1,13 @@
+psycopg2-binary
+pandas
+sqlalchemy
+tenacity
+openpyxl
+python-dotenv
+unidecode
+arabic-reshaper
+python-bidi
+colorama
+tqdm
+tabulate
+googletrans==4.0.0-rc1

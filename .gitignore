@@ -1,0 +1,12 @@
+data/*
+data/
+venv/
+venv/*
+log/
+logs
+logs/*
+docs/
+docs/*
+out
+output
+
