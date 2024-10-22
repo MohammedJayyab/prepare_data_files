@@ -17,6 +17,7 @@ def clean_description(desc):
     return re.sub(r'^[\s\-:]+|[\s\-:]+$', '', desc)
 
 def correct_product_description(input_file_path, output_file_path):
+    print(f"Correcting product descriptions ..............")
     # Load the CSV file into a DataFrame, treating all columns as strings
     df = pd.read_csv(input_file_path, encoding='utf-8-sig', dtype=str, low_memory=False)
 
@@ -33,10 +34,10 @@ def correct_product_description(input_file_path, output_file_path):
 
     # Iterate through the DataFrame to apply the correction rules
     for index, row in df.iterrows():
-        en_short_desc = row['EN_SHORT_DESC'] if pd.notnull(row['EN_SHORT_DESC']) else ''
-        en_full_desc = row['EN_FULL_DESCRIPTION'] if pd.notnull(row['EN_FULL_DESCRIPTION']) else ''
+        en_short_desc = row['en_short_desc'] if pd.notnull(row['en_short_desc']) else ''
+        en_full_desc = row['en_full_description'] if pd.notnull(row['en_full_description']) else ''
 
-        # Extract the product number (e.g., #HL001) from EN_FULL_DESCRIPTION
+        # Extract the product number (e.g., #HL001) from en_full_description
         product_number = extract_product_number(en_full_desc)
 
         # Remove product number from full description for further processing
@@ -47,29 +48,29 @@ def correct_product_description(input_file_path, output_file_path):
 
         modified_short_desc = en_short_desc.strip()  # Start with the original short description
 
-        # Rule: If EN_SHORT_DESC is null, empty, or numeric, set it to EN_FULL_DESCRIPTION
+        # Rule: If en_short_desc is null, empty, or numeric, set it to en_full_description
         if modified_short_desc == '' or is_numeric(modified_short_desc):
             modified_short_desc = en_full_desc_cleaned
         
-        # Rule 1: If EN_SHORT_DESC equals BARCODE value, set it to EN_FULL_DESCRIPTION
-        elif modified_short_desc == row['BARCODE']:
+        # Rule 1: If en_short_desc equals barcode value, set it to en_full_description
+        elif modified_short_desc == row['barcode']:
             modified_short_desc = en_full_desc_cleaned
 
-        # Rule 2: If EN_SHORT_DESC starts with '*' and ends with '*', preserve it
+        # Rule 2: If en_short_desc starts with '*' and ends with '*', preserve it
         elif modified_short_desc.startswith('*') and modified_short_desc.endswith('*'):
-            continue  # Skip appending details, preserving EN_SHORT_DESC as is
+            continue  # Skip appending details, preserving en_short_desc as is
         
-        # Rule 3a: If EN_SHORT_DESC starts with '#', check if it contains EN_FULL_DESCRIPTION, then set it to EN_FULL_DESCRIPTION
-        elif modified_short_desc.startswith('#') and modified_short_desc in row['EN_FULL_DESCRIPTION']:
+        # Rule 3a: If en_short_desc starts with '#', check if it contains en_full_description, then set it to en_full_description
+        elif modified_short_desc.startswith('#') and modified_short_desc in row['en_full_description']:
             modified_short_desc = en_full_desc_cleaned
         
-        # Rule 3b: If EN_SHORT_DESC starts with '#' and doesn't contain EN_FULL_DESCRIPTION, concatenate EN_FULL_DESCRIPTION and EN_SHORT_DESC
-        elif modified_short_desc.startswith('#') and modified_short_desc not in row['EN_FULL_DESCRIPTION']:
+        # Rule 3b: If en_short_desc starts with '#' and doesn't contain en_full_description, concatenate en_full_description and en_short_desc
+        elif modified_short_desc.startswith('#') and modified_short_desc not in row['en_full_description']:
             modified_short_desc = en_full_desc_cleaned + ' ' + modified_short_desc
 
         # New Rule: Detect non-informative short description and avoid duplication
         if not is_informative(modified_short_desc, en_full_desc_cleaned):
-            # If short description lacks details, append missing details from EN_FULL_DESCRIPTION
+            # If short description lacks details, append missing details from en_full_description
             missing_details = ' '.join([word for word in en_full_desc_cleaned.split() if word not in modified_short_desc])
             modified_short_desc = missing_details.strip() + ' ' + modified_short_desc.strip()
 
@@ -80,11 +81,12 @@ def correct_product_description(input_file_path, output_file_path):
         # Ensure the product number stays at the end and doesn't have extra hyphen
         modified_short_desc = clean_description(modified_short_desc)
 
-        # Convert both EN_FULL_DESCRIPTION and MODIFIED_SHORT_DESC to uppercase and strip spaces
+        # Convert both en_full_description and MODIFIED_SHORT_DESC to uppercase and strip spaces
         df.at[index, 'MODIFIED_SHORT_DESC'] = ' '.join(modified_short_desc.upper().split())
 
     # Save the corrected DataFrame to a new CSV file, using correct quoting for non-numeric fields
     df.to_csv(output_file_path, index=False, quoting=csv.QUOTE_NONNUMERIC, encoding='utf-8-sig')
+    print(f"Product descriptions corrected and saved to: {output_file_path}")
 
 # Example usage:
 # correct_product_description('input_file.csv', 'output_file.csv')

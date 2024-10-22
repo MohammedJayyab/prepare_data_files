@@ -10,4 +10,6 @@ python-bidi
 colorama
 tqdm
 tabulate
-googletrans==4.0.0-rc1
+#googletrans==4.0.0-rc1
+matplotlib 
+seaborn 

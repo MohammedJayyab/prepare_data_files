@@ -25,7 +25,7 @@ def check_unique(df, column, display_name):
     if not duplicates.empty:
         for _, row in tqdm(duplicates.iterrows(), total=duplicates.shape[0], desc=f'Checking duplicates in {display_name}'):
             line = row.name + 2
-            context = f"Line {line}: {column}='{row[column]}' | ITEM_NUMBER={row['ITEM_NUMBER']} | BRAND={row['BRAND']}"
+            context = f"Line {line}: {column}='{row[column]}' | item_number={row['item_number']} | brand={row['brand']}"
             log_error(f"Duplicate {display_name}: {context}")
 
 def check_null_empty(df, column, display_name):
@@ -33,43 +33,43 @@ def check_null_empty(df, column, display_name):
     filtered = df[condition]
     for idx in tqdm(filtered.index, desc=f'Checking null/empty in {display_name}'):
         line = idx + 2
-        log_error(f"{display_name} is null/empty: Line {line}, ITEM_NUMBER={df.at[idx, 'ITEM_NUMBER']}")
+        log_error(f"{display_name} is null/empty: Line {line}, item_number={df.at[idx, 'item_number']}")
 
 def check_whitespace(df, column, display_name):
     condition = df[column].astype(str).str.startswith(' ') | df[column].astype(str).str.endswith(' ')
     filtered = df[condition]
     for idx in tqdm(filtered.index, desc=f'Checking whitespace in {display_name}'):
         line = idx + 2
-        log_warning(f"{display_name} has leading/trailing whitespace: Line {line}, ITEM_NUMBER={df.at[idx, 'ITEM_NUMBER']}")
+        log_warning(f"{display_name} has leading/trailing whitespace: Line {line}, item_number={df.at[idx, 'item_number']}")
 
 def check_fields(df):
-    check_unique(df, 'AR_FULL_DESCRIPTION', 'AR_FULL_DESCRIPTION')
-    check_null_empty(df, 'AR_FULL_DESCRIPTION', 'AR_FULL_DESCRIPTION')
+    check_unique(df, 'ar_full_description', 'ar_full_description')
+    check_null_empty(df, 'ar_full_description', 'ar_full_description')
     
-    check_unique(df, 'BARCODE', 'BARCODE')
-    check_null_empty(df, 'BARCODE', 'BARCODE')
-    #check_whitespace(df, 'BARCODE', 'BARCODE')
+    check_unique(df, 'barcode', 'barcode')
+    check_null_empty(df, 'barcode', 'barcode')
+    #check_whitespace(df, 'barcode', 'barcode')
 
-    check_unique(df, 'EN_FULL_DESCRIPTION', 'EN_FULL_DESCRIPTION')
-    check_null_empty(df, 'EN_FULL_DESCRIPTION', 'EN_FULL_DESCRIPTION')
+    check_unique(df, 'en_full_description', 'en_full_description')
+    check_null_empty(df, 'en_full_description', 'en_full_description')
     
-    #check_whitespace(df, 'EN_FULL_DESCRIPTION', 'EN_FULL_DESCRIPTION')
+    #check_whitespace(df, 'en_full_description', 'en_full_description')
 
-    check_unique(df, 'EN_SHORT_DESC', 'EN_SHORT_DESC')
-    check_null_empty(df, 'EN_SHORT_DESC', 'EN_SHORT_DESC')
-    #check_whitespace(df, 'EN_SHORT_DESC', 'EN_SHORT_DESC')
+    check_unique(df, 'en_short_desc', 'en_short_desc')
+    check_null_empty(df, 'en_short_desc', 'en_short_desc')
+    #check_whitespace(df, 'en_short_desc', 'en_short_desc')
 
-    check_unique(df, 'AR_SHORT_DESC', 'AR_SHORT_DESC')
-    check_null_empty(df, 'AR_SHORT_DESC', 'AR_SHORT_DESC')
-    #check_whitespace(df, 'AR_SHORT_DESC', 'AR_SHORT_DESC')
+    check_unique(df, 'ar_short_desc', 'ar_short_desc')
+    check_null_empty(df, 'ar_short_desc', 'ar_short_desc')
+    #check_whitespace(df, 'ar_short_desc', 'ar_short_desc')
 
-    fields = ['BRAND', 'CATEGORY_LEVEL1', 'CATEGORY_LEVEL2', 'CATEGORY_LEVEL3', 'CATEGORY_LEVEL4']
+    fields = ['brand', 'category_level1', 'category_level2', 'category_level3', 'category_level4']
     for field in fields:
         condition = df[field].isnull() | df[field].astype(str).str.strip().eq('')
         filtered = df[condition]
         for idx in tqdm(filtered.index, desc=f'Checking null/empty in {field}'):
             line = idx + 2
-            log_error(f"{field} is null/empty: Line {line}, ITEM_NUMBER={df.at[idx, 'ITEM_NUMBER']}")
+            log_error(f"{field} is null/empty: Line {line}, item_number={df.at[idx, 'item_number']}")
 
 def main():
     print(Fore.CYAN + "Starting validation...")
@@ -77,7 +77,7 @@ def main():
         os.makedirs('log')
     open(LOG_PATH, 'w').close()
     try:
-        df = pd.read_excel(FILE_PATH, dtype={'BARCODE': str})
+        df = pd.read_excel(FILE_PATH, dtype={'barcode': str})
     except Exception as e:
         log_error(f"Failed to read Excel file: {e}")
         sys.exit(1)

@@ -19,14 +19,14 @@ def find_missing_products():
     
     try:
         # Read the Excel and CSV files, treating barcodes and product IDs as strings
-        df_excel = pd.read_excel(EXCEL_PATH, dtype={'BARCODE': str})
+        df_excel = pd.read_excel(EXCEL_PATH, dtype={'barcode': str})
         df_csv = pd.read_csv(CSV_PATH, dtype={'product_id': str})
     except Exception as e:
         print(Fore.RED + f"Error reading files: {e}")
         sys.exit(1)
     
     # Get sets of barcodes and product IDs
-    excel_barcodes = set(df_excel['BARCODE'].dropna().str.strip())
+    excel_barcodes = set(df_excel['barcode'].dropna().str.strip())
     csv_product_ids = set(df_csv['product_id'].dropna().str.strip())
     
     # Find missing product IDs in the CSV that are not in the Excel file

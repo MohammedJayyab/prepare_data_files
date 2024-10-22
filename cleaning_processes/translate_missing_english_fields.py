@@ -17,18 +17,18 @@ def translate_missing_english_fields(input_file_path, output_file_path):
         translated_full_desc = False  # Flag to track if a full description translation happened
         translated_short_desc = False  # Flag to track if a short description translation happened
 
-        # If EN_FULL_DESCRIPTION is empty/null, translate from AR_FULL_DESCRIPTION
-        if pd.isnull(row['EN_FULL_DESCRIPTION']) or row['EN_FULL_DESCRIPTION'].strip() == '':
-            if not pd.isnull(row['AR_FULL_DESCRIPTION']) and row['AR_FULL_DESCRIPTION'].strip() != '':
-                translated_text = translator.translate(row['AR_FULL_DESCRIPTION'], dest='en').text
-                df.at[index, 'EN_FULL_DESCRIPTION'] = translated_text
+        # If en_full_description is empty/null, translate from ar_full_description
+        if pd.isnull(row['en_full_description']) or row['en_full_description'].strip() == '':
+            if not pd.isnull(row['ar_full_description']) and row['ar_full_description'].strip() != '':
+                translated_text = translator.translate(row['ar_full_description'], dest='en').text
+                df.at[index, 'en_full_description'] = translated_text
                 translated_full_desc = True
 
-        # If EN_SHORT_DESC is empty/null, translate from AR_SHORT_DESC
-        if pd.isnull(row['EN_SHORT_DESC']) or row['EN_SHORT_DESC'].strip() == '':
-            if not pd.isnull(row['AR_SHORT_DESC']) and row['AR_SHORT_DESC'].strip() != '':
-                translated_text = translator.translate(row['AR_SHORT_DESC'], dest='en').text
-                df.at[index, 'EN_SHORT_DESC'] = translated_text
+        # If en_short_desc is empty/null, translate from ar_short_desc
+        if pd.isnull(row['en_short_desc']) or row['en_short_desc'].strip() == '':
+            if not pd.isnull(row['ar_short_desc']) and row['ar_short_desc'].strip() != '':
+                translated_text = translator.translate(row['ar_short_desc'], dest='en').text
+                df.at[index, 'en_short_desc'] = translated_text
                 translated_short_desc = True
 
         # If either translation occurred, set the Translation_Status column to 'Translated To English'

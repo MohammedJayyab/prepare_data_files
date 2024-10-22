@@ -46,8 +46,8 @@ def check_validate_integrity(input_file_path, required_columns):
 
     # Step 5: Check for misplaced commas only in specific columns
     columns_to_check_for_commas = [
-        "BARCODE", "UOM", "PACKING", "CATEGORY_LEVEL1", 
-        "CATEGORY_LEVEL2", "CATEGORY_LEVEL3", "CATEGORY_LEVEL4"
+        "barcode", "category_level1", 
+        "category_level2", "category_level3", "category_level4"
     ]
 
     problematic_rows = df[df.apply(
@@ -106,13 +106,13 @@ def log_issues_to_csv(missing_columns, empty_columns, rows_with_missing_values, 
 
 # Main method to run the validation process
 def main():
-    input_file_path = 'output/Cleaned_FARM_ITEM_MASTER_FILE.csv'  # Updated to correct path
+    input_file_path = 'output/Cleaned_ml_items_master.csv'  # Updated to correct path
     
     # Define the required columns for validation
     required_columns = [
-        "ITEM_NUMBER", "EN_FULL_DESCRIPTION", "AR_FULL_DESCRIPTION", 
-        "BARCODE", "UOM", "PACKING", "EN_SHORT_DESC", "AR_SHORT_DESC", 
-        "BRAND", "CATEGORY_LEVEL1", "CATEGORY_LEVEL2", "CATEGORY_LEVEL3", "CATEGORY_LEVEL4"
+        "item_number", "en_full_description", "ar_full_description", 
+        "barcode", "UOM", "packing", "en_short_desc", "ar_short_desc", 
+        "brand", "category_level1", "category_level2", "category_level3", "category_level4"
     ]
 
     check_validate_integrity(input_file_path, required_columns)

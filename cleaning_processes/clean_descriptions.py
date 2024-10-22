@@ -9,14 +9,14 @@ init(autoreset=True)
 # Function to clean descriptions by combining full and short descriptions, and removing empty rows
 def clean_descriptions(input_file_path, output_file_path):
     # Load the data from the input file
-    df = pd.read_csv(input_file_path, dtype={'BARCODE': str})
+    df = pd.read_csv(input_file_path, dtype={'barcode': str})
 
     # Step 1: Check and remove rows where all description columns are null or empty
     empty_description_mask = (
-        df['EN_FULL_DESCRIPTION'].isnull() | df['EN_FULL_DESCRIPTION'].str.strip().eq('')) & \
-        (df['EN_SHORT_DESC'].isnull() | df['EN_SHORT_DESC'].str.strip().eq('')) & \
-        (df['AR_FULL_DESCRIPTION'].isnull() | df['AR_FULL_DESCRIPTION'].str.strip().eq('')) & \
-        (df['AR_SHORT_DESC'].isnull() | df['AR_SHORT_DESC'].str.strip().eq(''))
+        df['en_full_description'].isnull() | df['en_full_description'].str.strip().eq('')) & \
+        (df['en_short_desc'].isnull() | df['en_short_desc'].str.strip().eq('')) & \
+        (df['ar_full_description'].isnull() | df['ar_full_description'].str.strip().eq('')) & \
+        (df['ar_short_desc'].isnull() | df['ar_short_desc'].str.strip().eq(''))
 
     # Count the number of rows with all empty description fields
     empty_count = df[empty_description_mask].shape[0]
@@ -29,12 +29,12 @@ def clean_descriptions(input_file_path, output_file_path):
     df = df[~empty_description_mask]
 
     # Step 2: Create new columns for combined English and Arabic descriptions
-    df['EN_COMBINED_DESC'] = df.apply(lambda row: row['EN_FULL_DESCRIPTION'] if pd.notnull(row['EN_FULL_DESCRIPTION']) and row['EN_FULL_DESCRIPTION'].strip() != ''
-                                      else row['EN_SHORT_DESC'] if pd.notnull(row['EN_SHORT_DESC']) and row['EN_SHORT_DESC'].strip() != ''
+    df['EN_COMBINED_DESC'] = df.apply(lambda row: row['en_full_description'] if pd.notnull(row['en_full_description']) and row['en_full_description'].strip() != ''
+                                      else row['en_short_desc'] if pd.notnull(row['en_short_desc']) and row['en_short_desc'].strip() != ''
                                       else None, axis=1)
     
-    df['AR_COMBINED_DESC'] = df.apply(lambda row: row['AR_FULL_DESCRIPTION'] if pd.notnull(row['AR_FULL_DESCRIPTION']) and row['AR_FULL_DESCRIPTION'].strip() != ''
-                                      else row['AR_SHORT_DESC'] if pd.notnull(row['AR_SHORT_DESC']) and row['AR_SHORT_DESC'].strip() != ''
+    df['AR_COMBINED_DESC'] = df.apply(lambda row: row['ar_full_description'] if pd.notnull(row['ar_full_description']) and row['ar_full_description'].strip() != ''
+                                      else row['ar_short_desc'] if pd.notnull(row['ar_short_desc']) and row['ar_short_desc'].strip() != ''
                                       else None, axis=1)
 
     # Step 3: Create a final combined description column that includes both English and Arabic combined descriptions
@@ -54,22 +54,22 @@ def clean_descriptions(input_file_path, output_file_path):
 # Function to display duplication statistics
 def display_duplication_statistics(df):
     # Calculate duplication statistics
-    total_duplicated_en_full = df.duplicated(subset=['EN_FULL_DESCRIPTION'], keep=False).sum()
-    total_duplicated_en_short = df.duplicated(subset=['EN_SHORT_DESC'], keep=False).sum()
-    total_duplicated_both_en = df.duplicated(subset=['EN_FULL_DESCRIPTION', 'EN_SHORT_DESC'], keep=False).sum()
-    total_duplicated_ar_full = df.duplicated(subset=['AR_FULL_DESCRIPTION'], keep=False).sum()
-    total_duplicated_ar_short = df.duplicated(subset=['AR_SHORT_DESC'], keep=False).sum()
-    total_duplicated_both_ar = df.duplicated(subset=['AR_FULL_DESCRIPTION', 'AR_SHORT_DESC'], keep=False).sum()
-    total_duplicated_all = df.duplicated(subset=['EN_FULL_DESCRIPTION', 'EN_SHORT_DESC', 'AR_FULL_DESCRIPTION', 'AR_SHORT_DESC'], keep=False).sum()
+    total_duplicated_en_full = df.duplicated(subset=['en_full_description'], keep=False).sum()
+    total_duplicated_en_short = df.duplicated(subset=['en_short_desc'], keep=False).sum()
+    total_duplicated_both_en = df.duplicated(subset=['en_full_description', 'en_short_desc'], keep=False).sum()
+    total_duplicated_ar_full = df.duplicated(subset=['ar_full_description'], keep=False).sum()
+    total_duplicated_ar_short = df.duplicated(subset=['ar_short_desc'], keep=False).sum()
+    total_duplicated_both_ar = df.duplicated(subset=['ar_full_description', 'ar_short_desc'], keep=False).sum()
+    total_duplicated_all = df.duplicated(subset=['en_full_description', 'en_short_desc', 'ar_full_description', 'ar_short_desc'], keep=False).sum()
 
     # Create a table of statistics
     table = [
-        ["EN_FULL_DESCRIPTION", total_duplicated_en_full],
-        ["EN_SHORT_DESC", total_duplicated_en_short],
-        ["Both EN_FULL_DESCRIPTION and EN_SHORT_DESC", total_duplicated_both_en],
-        ["AR_FULL_DESCRIPTION", total_duplicated_ar_full],
-        ["AR_SHORT_DESC", total_duplicated_ar_short],
-        ["Both AR_FULL_DESCRIPTION and AR_SHORT_DESC", total_duplicated_both_ar],
+        ["en_full_description", total_duplicated_en_full],
+        ["en_short_desc", total_duplicated_en_short],
+        ["Both en_full_description and en_short_desc", total_duplicated_both_en],
+        ["ar_full_description", total_duplicated_ar_full],
+        ["ar_short_desc", total_duplicated_ar_short],
+        ["Both ar_full_description and ar_short_desc", total_duplicated_both_ar],
         ["All EN and AR Descriptions", total_duplicated_all]
     ]
 

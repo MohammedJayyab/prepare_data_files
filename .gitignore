@@ -9,4 +9,10 @@ docs/
 docs/*
 out
 output
+output/*
+*.log
+*.csv
+/*.csv
+/Reports
+/Sql
 

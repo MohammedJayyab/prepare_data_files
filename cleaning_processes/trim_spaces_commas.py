@@ -12,7 +12,7 @@ def trim_spaces_commas(input_file_path, output_file_path):
 
     # Step 1: Load the data from the provided input file
     try:
-        df = pd.read_excel(input_file_path)
+        df = pd.read_csv(input_file_path,dtype=str)
         print(f"{Fore.CYAN}Data successfully loaded from: {input_file_path}{Style.RESET_ALL}")
     except Exception as e:
         print(f"{Fore.RED}Error loading file: {e}{Style.RESET_ALL}")
@@ -20,9 +20,9 @@ def trim_spaces_commas(input_file_path, output_file_path):
 
     # Step 2: Define the columns for which leading and trailing spaces should be trimmed
     columns_to_trim = [
-        "EN_FULL_DESCRIPTION", "AR_FULL_DESCRIPTION", "BARCODE", "UOM", 
-        "PACKING", "EN_SHORT_DESC", "AR_SHORT_DESC", "BRAND", "VENDOR_NAME"
-        "CATEGORY_LEVEL1", "CATEGORY_LEVEL2", "CATEGORY_LEVEL3", "CATEGORY_LEVEL4"
+        "en_full_description", "ar_full_description",  
+         "en_short_desc", "ar_short_desc", "brand"
+        "category_level1", "category_level2", "category_level3", "category_level4"
     ]
 
     # Step 3: Process each specified column to trim spaces, remove commas, semicolons, newlines, and handle multi-spaces
@@ -40,7 +40,7 @@ def trim_spaces_commas(input_file_path, output_file_path):
     # Step 4: Save the cleaned DataFrame to the output CSV file
     try:
         print(f"{Fore.CYAN}Saving the cleaned data to: {output_file_path}{Style.RESET_ALL}")
-        df.to_csv(output_file_path, index=False, quoting=csv.QUOTE_NONNUMERIC, encoding='utf-8-sig')
+        df.to_csv(output_file_path, index=False, quoting=csv.QUOTE_ALL, encoding='utf-8-sig')
         print(f"{Fore.GREEN}Trimming is finished. Cleaned data saved to: {output_file_path}{Style.RESET_ALL}")
     except Exception as e:
         print(f"{Fore.RED}Error saving file: {e}{Style.RESET_ALL}")
