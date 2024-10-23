@@ -23,7 +23,6 @@ def create_customer_feature_table(transactions_df, output_file):
     # Adding time-related features for each transaction
     transactions_df['day_of_week'] = transactions_df['timestamp'].dt.day_name()
     transactions_df['time_of_day'] = transactions_df['timestamp'].dt.hour
-    transactions_df['month'] = transactions_df['timestamp'].dt.to_period('M')
 
     # Progress bar for groupby operations
     print("Calculating customer statistics...")
@@ -35,7 +34,6 @@ def create_customer_feature_table(transactions_df, output_file):
         last_purchase=('timestamp', 'max'),                   # Date of last purchase
         most_frequent_day=('day_of_week', lambda x: x.mode()[0]),  # Most frequent day of the week
         most_frequent_time=('time_of_day', lambda x: x.mode()[0]), # Most frequent time of day
-        unique_products_purchased=('item_number', 'nunique')  # Unique products purchased
     ).reset_index()
 
     # Add derived features
@@ -56,43 +54,19 @@ def create_customer_feature_table(transactions_df, output_file):
     # Customer lifetime (days between first and last purchase)
     customer_stats['customer_lifetime'] = (customer_stats['last_purchase'] - customer_stats['first_purchase']).dt.days
 
-    # Calculate Monthly Spending Mean and Std
-    print("Calculating monthly spending statistics...")
-    monthly_spending = transactions_df.groupby(['customer_barcode', 'month'])['amount'].sum().reset_index()
-    monthly_spending_stats = monthly_spending.groupby('customer_barcode').agg(
-        monthly_spending_mean=('amount', 'mean'),
-        monthly_spending_std=('amount', 'std')
-    ).reset_index()
-
-    # Merge monthly spending statistics into customer_stats
-    customer_stats = pd.merge(customer_stats, monthly_spending_stats, on='customer_barcode', how='left')
-
-    # Spending Trend (Linear regression over monthly spending)
-    print("Calculating spending trend...")
-    monthly_spending['month_numeric'] = monthly_spending['month'].dt.to_timestamp().astype(int) // 10**9  # Convert month to numeric format (epoch time)
-
-    def calculate_spending_trend(group):
-        if len(group) > 1:
-            return np.polyfit(group['month_numeric'], group['amount'], 1)[0]
-        else:
-            return 0  # No trend if only one data point
-
-    spending_trend = monthly_spending.groupby('customer_barcode').apply(calculate_spending_trend).reset_index(name='spending_trend')
-    customer_stats = pd.merge(customer_stats, spending_trend, on='customer_barcode', how='left')
-
     # Determine the favorite category (most purchased)
-    # if 'category_name' in transactions_df.columns:
-    #     print("Calculating favorite category for each customer...")
-    #     product_stats = transactions_df.groupby(['customer_barcode', 'category_name']).agg(
-    #         total_category_purchases=('quantity', 'sum')
-    #     ).reset_index()
+    if 'category_name' in transactions_df.columns:
+        print("Calculating favorite category for each customer...")
+        product_stats = transactions_df.groupby(['customer_barcode', 'category_name']).agg(
+            total_category_purchases=('quantity', 'sum')
+        ).reset_index()
 
-    #     favorite_category = product_stats.loc[product_stats.groupby('customer_barcode')['total_category_purchases'].idxmax()]
-    #     customer_stats = pd.merge(customer_stats, favorite_category[['customer_barcode', 'category_name']], on='customer_barcode', how='left')
-    #     customer_stats.rename(columns={'category_name': 'favorite_category'}, inplace=True)
-    # else:
-    #     print("Warning: 'category_name' column not found, skipping favorite category calculation.")
-    #     customer_stats['favorite_category'] = np.nan
+        favorite_category = product_stats.loc[product_stats.groupby('customer_barcode')['total_category_purchases'].idxmax()]
+        customer_stats = pd.merge(customer_stats, favorite_category[['customer_barcode', 'category_name']], on='customer_barcode', how='left')
+        customer_stats.rename(columns={'category_name': 'favorite_category'}, inplace=True)
+    else:
+        print("Warning: 'category_name' column not found, skipping favorite category calculation.")
+        customer_stats['favorite_category'] = np.nan
 
     # Calculate purchase trend over time (upward, downward, stable)
     print("Calculating purchase trend over time (weekly purchases)...")
@@ -140,26 +114,17 @@ def create_customer_feature_table(transactions_df, output_file):
     # Round the float columns to 2 decimal places
     customer_stats = customer_stats.round(2)
 
-    # Rearrange the columns in a more logical order
-    customer_stats = customer_stats[[
-        'customer_barcode', 'first_purchase', 'last_purchase', 'customer_lifetime', 
-        'total_orders', 'order_segment', 'frequency', 'frequency_zscore', 'frequency_segment', 'is_high_frequency_customer',
-        'total_items', 'unique_products_purchased', 'average_quantity_per_order', 
-        'total_spent', 'average_order_value', 'average_spend_per_item', 'monetary', 'monetary_zscore', 'monetary_segment', 'is_high_value_customer', 
-        'recency_days', 'avg_time_between_purchases',
-        'most_frequent_day', 'most_frequent_time', 'monthly_spending_mean', 'monthly_spending_std', 
-        'spending_trend', 'purchase_trend'
-    ]]
-
     # Export the resulting dataframe to CSV
     print(f"Saving customer feature table to {output_file}...")
+    #customer_stats.to_csv(output_file, index=False,dtype=str, quotechar='"', quoting=2)
     customer_stats.to_csv(output_file, index=False)
+
     print(f"Feature table saved to {output_file} successfully.")
 
 # Main function to generate the customer feature table
 def main():
-    transactions_file_path = os.path.join('output', 'an_ml_transactions_outbox.csv')
-    output_file = os.path.join('reports', 'customer_feature_table_ext.csv')
+    transactions_file_path = os.path.join('output', 'Cleaned_ml_transactions_outbox.csv')
+    output_file = os.path.join('reports', 'customer_feature_table.csv')
 
     # Load the cleaned transaction data
     print("Starting process to generate customer feature table...")
